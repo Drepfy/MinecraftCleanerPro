@@ -1,0 +1,94 @@
+<UserControl x:Class="CleanerPro.App.Views.InstallationsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:CleanerPro.App.Controls">
+  <Grid Margin="{StaticResource Space.Page}">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="{StaticResource Space.Gap}">
+      <Button Content="_Refresh discovery" Command="{Binding RefreshCommand}" Style="{StaticResource Button.Primary}" />
+      <Button Content="_Add folder…" Command="{Binding AddFolderCommand}" ToolTip="Add a game directory, modpack instance or portable installation that was not found automatically." />
+      <Button Content="Re_move folder" Command="{Binding RemoveFolderCommand}" ToolTip="Only folders you added yourself can be removed. Nothing is deleted from disk." />
+      <Button Content="_Open in Explorer" Command="{Binding OpenFolderCommand}" />
+      <Button Content="_Search for more game folders" Command="{Binding SearchCommand}"
+              ToolTip="Looks at folder names in your user folders and the top levels of local drives to find game folders of portable or less common launchers. Files are never opened." />
+      <Button Content="Stop searc_h" Command="{Binding CancelSearchCommand}" />
+    </StackPanel>
+
+    <StackPanel Grid.Row="1" Margin="{StaticResource Space.Gap}">
+      <TextBlock Text="{Binding ScopeExplanation, Mode=OneWay}" Style="{StaticResource Text.Muted}" />
+      <controls:PrivateText Value="{Binding SearchStatus, Mode=OneWay}" Style="{StaticResource Text.Muted}" FontStyle="Italic"
+                 Visibility="{Binding SearchStatus, Converter={StaticResource HasValueToVisibility}}" AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+
+    <Grid Grid.Row="2">
+      <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding Selected, Mode=TwoWay}" AutomationProperties.Name="Discovered installations">
+        <DataGrid.Columns>
+          <DataGridTemplateColumn Header="Scan" SortMemberPath="IsEnabled" Width="Auto">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate>
+                <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" Margin="0"
+                          AutomationProperties.Name="{Binding Name, Mode=OneWay, StringFormat='Include {0} in scans'}" />
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTemplateColumn Header="Name" SortMemberPath="Name" Width="2*">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate><controls:PrivateText Value="{Binding Name, Mode=OneWay}" /></DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTextColumn Header="Launcher" Binding="{Binding Launcher, Mode=OneWay}" Width="Auto" />
+          <DataGridTextColumn Header="Mod loader" Binding="{Binding Loaders, Mode=OneWay}" Width="Auto" />
+          <DataGridTemplateColumn Header="Location" SortMemberPath="RootPath" Width="3*">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate><controls:PrivateText Value="{Binding RootPath, Mode=OneWay}" /></DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTextColumn Header="Found via" Binding="{Binding DiscoveredBy, Mode=OneWay}" Width="*" />
+          <DataGridTextColumn Header="Last inspected" Binding="{Binding LastInspected, Mode=OneWay}" Width="Auto" />
+        </DataGrid.Columns>
+      </DataGrid>
+      <TextBlock Text="No Minecraft installation was found in the default locations. Use 'Add folder…' to add your game folder."
+                 Style="{StaticResource Text.Muted}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24"
+                 Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}" />
+    </Grid>
+
+    <Grid Grid.Row="3" Margin="0,12,0,0">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <Expander Grid.Column="0" Header="Selected installation details" IsExpanded="True" Margin="0,0,12,0">
+        <StackPanel Margin="8">
+          <TextBlock Text="{Binding Selected.Name, Mode=OneWay}" Style="{StaticResource Text.Label}" />
+          <TextBlock Text="{Binding Selected.RootPath, Mode=OneWay}" Style="{StaticResource Text.Mono}" />
+          <TextBlock Text="{Binding Selected.Notes, Mode=OneWay}" Style="{StaticResource Text.Muted}" Margin="0,6,0,0" />
+        </StackPanel>
+      </Expander>
+      <Expander Grid.Column="1" Header="Discovery notes and locations checked">
+        <StackPanel Margin="8">
+          <ItemsControl ItemsSource="{Binding Notes}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <controls:PrivateText Value="{Binding Mode=OneWay}" Style="{StaticResource Text.Body}" Margin="{StaticResource Space.GapSmall}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Text="Locations checked:" Style="{StaticResource Text.Label}" />
+          <ItemsControl ItemsSource="{Binding LocationsChecked}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <controls:PrivateText Value="{Binding Mode=OneWay}" Style="{StaticResource Text.Small}" FontFamily="{StaticResource Font.Mono}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Expander>
+    </Grid>
+  </Grid>
+</UserControl>
