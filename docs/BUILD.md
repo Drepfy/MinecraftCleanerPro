@@ -2,10 +2,12 @@
 
 ## Requirements
 
-- .NET SDK **10.0.1xx** (pinned by `global.json`, `rollForward: latestFeature`). .NET 10 is an LTS release.
+- .NET 10 SDK, **10.0.100 or newer**. `global.json` uses `rollForward: latestFeature`, so newer 10.0 feature bands
+  are accepted; the build log records the exact version used. .NET 10 is an LTS release.
 - Windows 10/11 to run the application and the Windows-only tests. Linux/macOS can compile, test the
   platform-independent code and publish the Windows executable (`EnableWindowsTargeting`).
-- Python 3 for the XAML resource check (optional but part of the scripts).
+- Python 3 for the XAML resource check. `scripts/build.ps1` and `scripts/build.sh` require it; it is only optional
+  if you run the `dotnet` commands yourself.
 
 Packages are restored only from nuget.org (`NuGet.config`), with versions pinned centrally in
 `Directory.Packages.props`. Warnings are treated as errors.
@@ -40,8 +42,9 @@ Symbols are embedded (`DebugType=embedded`), so no extra files are published.
 ## Verifying a published executable
 
 ```powershell
-.\MinecraftCleanerPro.exe --self-test "$env:TEMP\mcp-selftest.json" --data-root "$env:TEMP\mcp-selftest"
-.\MinecraftCleanerPro.exe --smoke-ui  "$env:TEMP\mcp-smoke.log"     --data-root "$env:TEMP\mcp-smoke"
+# It is a windowed program, so wait for it to exit before reading the exit code.
+$p = Start-Process .\MinecraftCleanerPro.exe -ArgumentList '--self-test', "`"$env:TEMP\mcp-selftest.json`"", '--data-root', "`"$env:TEMP\mcp-selftest`"" -Wait -PassThru; $p.ExitCode
+$p = Start-Process .\MinecraftCleanerPro.exe -ArgumentList '--smoke-ui', "`"$env:TEMP\mcp-smoke.log`"", '--data-root', "`"$env:TEMP\mcp-smoke`"" -Wait -PassThru; $p.ExitCode
 ```
 `--self-test` runs headlessly against harmless fixtures in a temporary folder (configuration, rules, scan,
 quarantine, restore, path protection, reports, offline mode) and writes a JSON result; exit code 0 = passed.
@@ -59,7 +62,8 @@ CI workflow records the SHA-256 of every build it produces.
 - `.github/workflows/build.yml` runs on every push to `main` and every pull request, on `windows-latest`: XAML
   check, Release build, all tests (including Windows-only ones), single-file publish, SHA-256, the executable's
   `--self-test` and `--smoke-ui`. The executable, hash, self-test result, smoke log and test results are kept as
-  the `MinecraftCleanerPro-win-x64` artifact (visible to repository members).
+  the `MinecraftCleanerPro-win-x64` artifact (downloadable by anyone signed in to GitHub, for GitHub's artifact
+  retention period). For a download that needs no account, use a release.
 - `.github/workflows/release.yml` runs when a tag such as `v1.1.0` is pushed. It refuses to publish unless the tag
   matches `Version` in `Directory.Build.props`, then runs the same build and every verification, and only if all of
   them pass creates a public GitHub Release with `MinecraftCleanerPro.exe`, its `.sha256` and the release notes

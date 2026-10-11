@@ -24,7 +24,7 @@ works fully offline. It does not claim to find every cheat — see [Known limita
 | Distribution | One self-contained `MinecraftCleanerPro.exe` (no .NET install needed) |
 | Network | None by default (offline mode on) |
 | Privileges | Runs as a normal user (`asInvoker`); never asks for administrator rights |
-| Code signing | **Not signed** — verify the SHA-256 in the release notes |
+| Code signing | **Not signed** — verify the SHA-256 on the [release page](https://github.com/Drepfy/MinecraftCleanerPro/releases/latest) |
 
 ## What it does
 
@@ -108,7 +108,7 @@ pwsh scripts/build.ps1 -SmokeUi
 # Linux/macOS: cross-compile and test (Windows-only tests are skipped)
 ./scripts/build.sh
 ```
-Requires the .NET 10 SDK. Output: `artifacts/publish/MinecraftCleanerPro.exe`. Details, including the
+Requires the .NET 10 SDK and Python 3 (the build scripts use it for a XAML check). Output: `artifacts/publish/MinecraftCleanerPro.exe`. Details, including the
 self-contained decision and reproducibility: [docs/BUILD.md](docs/BUILD.md).
 
 ## Project structure
@@ -157,7 +157,8 @@ MinecraftCleanerPro/
 - Quarantine encoding (XOR) prevents accidental execution; it is not encryption.
 - The executable is **not code-signed**.
 - The interface has been verified automatically only: the Windows CI smoke test opens and renders
-  every page, and the executable's headless self-test passes on Windows and under Wine. It has not
+  every page, and the executable's headless self-test passes on Windows and under Wine. Windows runs
+  were on GitHub's Windows Server runner (`windows-latest`), not on a desktop Windows 10 or 11 PC. It has not
   been tested interactively by a person, nor against real Minecraft installations or real cheat or
   malware files. See [docs/TEST-RESULTS.md](docs/TEST-RESULTS.md) for exactly what ran where.
 - This is not a replacement for antivirus software. If malware is found, change your passwords from a
